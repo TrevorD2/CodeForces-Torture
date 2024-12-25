@@ -1,9 +1,8 @@
-
-
-async function check_submission(handle) {
+async function check_submission() {
     const solved = await chrome.storage.sync.get(["solved"]);
     if(solved.solved==true) return;
 
+    
     const targetNode = document.querySelector('.status-frame-datatable');
 
     if (!targetNode) {
@@ -11,10 +10,14 @@ async function check_submission(handle) {
         return;
     }
 
+    const storageRequest = await chrome.storage.sync.get(["handle"]);
+    const handle = storageRequest.handle;
+
     const url = `https://codeforces.com/api/user.status?handle=${handle}&from=1&count=1`;
     try{
         const response = await fetch(url);
         const recentSubmissions = await response.json();
+        console.log(recentSubmissions)
         
         chrome.storage.sync.get(["problem_name"]).then((result) => {
             var problem_name = result["problem_name"];
@@ -49,4 +52,5 @@ async function check_submission(handle) {
     }
 }
 
-document.addEventListener("DOMContentLoaded", check_submission("TD5"));
+check_submission();
+document.addEventListener("DOMContentLoaded", check_submission);

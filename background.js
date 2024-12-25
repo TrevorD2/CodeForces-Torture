@@ -16,7 +16,7 @@ function add_redirect_rule(targetURL) {
   };
   chrome.declarativeNetRequest.updateDynamicRules(
       {
-          removeRuleIds: [1], // Remove any existing rule with the same ID
+          removeRuleIds: [1], //Remove any existing rule with the same ID
           addRules: [redirectRule]
       },
       () => {
@@ -65,45 +65,12 @@ function get_random_problem(problemset){
 }
 
 async function generate_random_problem(){
-  const problem_set = await filter_problems_by_rating(0,1000);
+  const lbound = await chrome.storage.sync.get(["lower_rbound"]);
+  const rbound = await chrome.storage.sync.get(["upper_rbound"]);
+  
+  const problem_set = await filter_problems_by_rating(lbound.lower_rbound,rbound.upper_rbound);
   return get_random_problem(problem_set);
 }
-
-/*
-const getStorageData = () => new Promise((resolve, reject) => {
-  chrome.storage.sync.get({current_problem: undefined}, function(data){
-    if(chrome.runtime.lastError) reject(chrome.runtime.lastError);
-    else resolve(data);
-  });
-});
-
-async function main(){
-  let problem;
-
-  try{
-    const data = await getStorageData();
-
-    if(data.current_problem === undefined){
-      const new_problem = await generate_random_problem();
-
-      await new Promise((resolve, reject) => {
-        chrome.storage.sync.set({current_problem: new_problem}, function(){
-          if(chrome.runtime.lastError) reject(chrome.runtime.lastError);
-          else resolve();
-        });
-      });
-      problem = new_problem;
-    }else problem = data.current_problem;
-
-    console.log(problem)
-    add_redirect_rule(problem["url"]);
-  } catch(e){
-    console.error(e);
-  }
-
-  
-}
-*/
 
 function get_miliseconds_til_midnight(){
   const now = new Date();
@@ -137,7 +104,7 @@ chrome.alarms.create("new_day_alarm", {
 
 chrome.alarms.onAlarm.addListener((alarm) => {
   if (alarm.name === "new_day_alarm") {
-    console.log("NEW DAY");
+    console.log("A new day has begun!");
     main();
   }
 });
@@ -167,11 +134,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === "stopRedirect") {
       remove_redirect_rule();
-      // Keep the message channel open for the async operation.
+      //Keep the message channel open for the async operation.
       return true;
   }
+  if(message.action === "startRedirect"){
+    main();
+    return true;
+  }
 });
-
-
-
-main();
