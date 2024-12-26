@@ -85,6 +85,8 @@ async function main(){
     const problem = await generate_random_problem();
 
     console.log(problem)
+
+    if(problem==undefined) return;
     chrome.storage.sync.set({ problem_name: problem["title"] }).then(() => {
       chrome.storage.sync.set({solved: false}).then(()=>{
         add_redirect_rule(problem["url"]);
@@ -111,6 +113,7 @@ chrome.alarms.onAlarm.addListener((alarm) => {
 
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   console.log("Tab Updated: ", tab.url);
+  if (tab.url==undefined) return;
   if (changeInfo.status === 'complete' && tab.url.includes('codeforces.com')) {
       console.log("Injecting script into:", tab.url);
       chrome.scripting.executeScript(
