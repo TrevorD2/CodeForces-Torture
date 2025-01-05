@@ -53,4 +53,3 @@ async function check_submission() {
 }
 
 check_submission();
-document.addEventListener("DOMContentLoaded", check_submission);
